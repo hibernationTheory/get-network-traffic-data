@@ -1,33 +1,64 @@
 /* https://github.com/ariya/phantomjs/blob/master/examples/netsniff.js */
 
-var url = 'http://127.0.0.1:9003/pages.html';
 var page = require('webpage').create();
 var system = require('system');
 var resources = [];
 var resourcesSucceeded = [];
 var resourcesFailed = [];
-var resourcesHtml = []; //text/html
-var resourcesJS = []; // application/javascript
-var resourcesCSS = []; //text/css
-var resourcesImage = []; //image/svg+xml
-var resourcesFonts = []; //application/x-font-ttf 
-var resourcesJson = []; //application/json
 // contentType
+//text/html
+// application/javascript
+//text/css
+//image/svg+xml
+//application/x-font-ttf 
+//application/json
+var TARGET_ARRAYS = {
+	"html":[],
+	"javascript":[],
+	"css":[],
+	"image":[],
+	"json":[],
+	"svg_xml":[],
+	"font":[]
+};
 
 function organizeByContentType(resource) {
 	if (resource.contentType.indexOf('html') > -1) {
-		resourcesHtml.push(resource);
+		TARGET_ARRAYS['html'].push(resource);
 	} else if (resource.contentType.indexOf('javascript') > -1) {
-		resourcesJS.push(resource);
+		TARGET_ARRAYS['javascript'].push(resource);
 	} else if (resource.contentType.indexOf('css') > -1) {
-		resourcesCSS.push(resource);
+		TARGET_ARRAYS['css'].push(resource);
 	} else if (resource.contentType.indexOf('svg+xml') > -1) {
-		resourcesImage.push(resource);
+		TARGET_ARRAYS['svg_xml'].push(resource);
 	} else if (resource.contentType.indexOf('font') > -1) {
-		resourcesFonts.push(resource);
+		TARGET_ARRAYS['font'].push(resource);
 	} else if (resource.contentType.indexOf('json') > -1) {
-		resourcesJson.push(resource);
+		TARGET_ARRAYS['json'].push(resource);
 	}
+};
+
+function sortContentData() {
+	/* not working */
+	for (var data in TARGET_ARRAYS) {
+		console.log(TARGET_ARRAYS[data].length);
+		TARGET_ARRAYS[data] = TARGET_ARRAYS[data].sort(function(item1, item2) {
+			var size1 = item1.bodySize || 0;
+			var size2 = item2.bodySize || 0;
+			return size1-size2;
+		});
+	};
+};
+
+function calculateTotalContentSize(resourceArray) {
+	var total = 0;
+	resourceArray.forEach(function(item) {
+		var size = item.bodySize;
+		if (size) {
+			total += size;
+		}
+	});
+	return total;
 }
 
 function checkMinSize(resourceArray) {
@@ -87,21 +118,69 @@ page.onResourceReceived = function(resource) {
 	} else {
 		resourcesSucceeded.push(resource);
 	}
-	//var resourceSize = resource.bodySize;
-	//console.log(resourceSize);
-	console.log( JSON.stringify(resource, undefined, 4) );
+	organizeByContentType(resource);
  }
 
-page.open(url, function(status) {
-	if (status !== 'success') {
-		console.log('failed to load the address');
-	}
-	var largestResource = checkMaxSize(resources);
-	var smallestResource  = checkMinSize(resources);
-	console.log(JSON.stringify(largestResource));
-	console.log(JSON.stringify(smallestResource));
-	resourcesFailed.forEach(function(resource) {
-		console.log('Resource failed to load: ' + resource.url + ' with a ' + resource.status);
+function getPageNetworkData(url, callback) {
+	var results = {
+		"resources":
+			{
+				"amount":0,
+				"smallest":"",
+				"largest":"",
+				"succeeded":[],
+				"failed":[],
+				"javascript":TARGET_ARRAYS['js'],
+				"css":TARGET_ARRAYS['css'],
+				"html":TARGET_ARRAYS['html'],
+				"json":TARGET_ARRAYS['json'],
+				"all":[],
+				"size_javascript":0,
+				"size_css":0,
+				"size_html":0,
+				"size_json":0,
+				"size_all":0
+			}
+	};
+	var res_res = results["resources"];
+	page.open(url, function(status) {
+		if (status !== 'success') {
+			console.log('failed to load the address');
+			phantom.exit();
+		}
+		var largestResource = checkMaxSize(resources);
+		var smallestResource  = checkMinSize(resources);
+		res_res["amount"] = resources.length;
+		res_res["smallest"] = smallestResource;
+		res_res["largest"] = largestResource;
+		res_res["succeeded"] = resourcesSucceeded;
+		res_res["all"] = resources;
+		res_res["size_all"] = calculateTotalContentSize(resources);
+
+		sortContentData();
+		res_res["html"] = TARGET_ARRAYS['html'];
+		res_res["size_html"] = calculateTotalContentSize(res_res["html"]);
+		res_res["css"] = TARGET_ARRAYS['css'];
+		res_res["size_css"] = calculateTotalContentSize(res_res["css"]);
+		res_res["json"] = TARGET_ARRAYS['json'];
+		res_res["size_json"] = calculateTotalContentSize(res_res["json"]);
+		res_res["javascript"] = TARGET_ARRAYS['javascript'];
+		res_res["size_javascript"] = calculateTotalContentSize(res_res["javascript"]);
+
+
+		resourcesFailed.forEach(function(resource) {
+			res_res["failed"].push(resource);
+			console.log('Resource failed to load: ' + resource.url + ' with a ' + resource.status);
+		});
+
+		var resultsStr = JSON.stringify(results, null, '\t');
+		callback(resultsStr);
+		phantom.exit();
 	});
-	phantom.exit();
-});
+}
+
+function main(url, callback) {
+	getPageNetworkData(url, callback);
+}
+
+module.exports = main;
