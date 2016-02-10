@@ -1,8 +1,9 @@
 # phantom-network-traffic-data
 
-Simple Phantomjs / CasperJS based script to get data about the network traffic data of a given url. 
-Outputs it's result into a json file. Requires a config file to work which has two keys (urls and output_file).
+A CasperJS based script to collect various data about the network traffic traffic for a given list of urls. 
+Outputs it's result into a json file. Requires a config file to work which has two keys (urls and the destination for the output_file).
 
+```
 {
 	"urls":[
 		"<url>",
@@ -10,4 +11,5 @@ Outputs it's result into a json file. Requires a config file to work which has t
 	],
 	"output_file":"output.json"
 }
+```
 

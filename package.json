@@ -1,7 +1,7 @@
 {
-  "name": "network-traffic-data",
+  "name": "get-network-traffic-data",
   "version": "0.0.0",
-  "description": "export json data for various performance statistics of given sites",
+  "description": "A CasperJS based script to collect various data about the network traffic traffic for a given list of urls. ",
   "main": "main.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
