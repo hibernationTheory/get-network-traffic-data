@@ -1,0 +1,26 @@
+{
+  "name": "network-traffic-data",
+  "version": "0.0.0",
+  "description": "export json data for various performance statistics of given sites",
+  "main": "main.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/hibernationTheory/phantom-network-traffic-data.git"
+  },
+  "keywords": [
+    "phantomjs",
+    "casperjs"
+  ],
+  "author": "Engin Arslan",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/hibernationTheory/phantom-network-traffic-data/issues"
+  },
+  "homepage": "https://github.com/hibernationTheory/phantom-network-traffic-data#readme",
+  "dependencies": {
+    "q": "^1.4.1"
+  }
+}

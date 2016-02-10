@@ -1,4 +1,4 @@
-function main(url, callback) {
+function main(casper, url, callback) {
 	var RESOURCES = [];
 	var RESOURCES_FAILED = [];
 	var TARGET_ARRAYS = {
@@ -15,14 +15,6 @@ function main(url, callback) {
 	/*
 		Event Listeners
 	*/
-
-	casper.on('error', function(msg) {
-		console.log(msg);
-	});
-
-	casper.on('remote.message', function(msg) {
-		console.log(msg);
-	});
 
 	casper.on('resource.received', function(resource) {
 		if (resource.stage === 'end' && !END) {
@@ -141,8 +133,6 @@ function main(url, callback) {
 		});
 		casper.run(function() {
 		});
-
-		
 	}
 	getPageNetworkData(url, callback);
 };

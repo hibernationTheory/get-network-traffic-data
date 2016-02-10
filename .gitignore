@@ -1,1 +1,5 @@
 config.json
+node_modules
+output.json
+npm_debug.log
+.DS_Store
